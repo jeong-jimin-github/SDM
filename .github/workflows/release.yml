@@ -2,7 +2,9 @@ name: Windows Release
 
 on:
   push:
-    branches: [main, master]
+    branches:
+      - main
+      - master
   workflow_dispatch:
 
 permissions:
@@ -24,14 +26,14 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
-      - name: Date tag (KST)
+      - name: Date tag
         id: meta
         shell: pwsh
         run: |
           $kst = [TimeZoneInfo]::FindSystemTimeZoneById("Korea Standard Time")
           $tag = [TimeZoneInfo]::ConvertTime([DateTime]::UtcNow, $kst).ToString("yyyy-MM-dd")
-          "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          "title=SDM $tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "tag=$tag"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "title=SDM $tag"
           Write-Host "Release tag $tag"
 
       - name: Publish win-x64
@@ -41,11 +43,13 @@ jobs:
       - name: Portable zip
         shell: pwsh
         run: |
-          $tag = "${{ steps.meta.outputs.tag }}"
+          $tag = $env:TAG
           $zip = "artifacts/SDM-portable-$tag.zip"
           if (Test-Path $zip) { Remove-Item $zip -Force }
           Compress-Archive -Path "artifacts/win-x64/*" -DestinationPath $zip -CompressionLevel Optimal
           Write-Host "Wrote $zip"
+        env:
+          TAG: ${{ steps.meta.outputs.tag }}
 
       - name: Install Inno Setup
         shell: pwsh
@@ -54,22 +58,28 @@ jobs:
       - name: Build installer
         shell: pwsh
         run: |
-          $tag = "${{ steps.meta.outputs.tag }}"
-          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
-          if (-not (Test-Path $iscc)) { $iscc = "$env:ProgramFiles\Inno Setup 6\ISCC.exe" }
-          & $iscc "installer\sdm.iss" `
-            "/DMyAppVersion=$tag" `
-            "/DSourceDir=$pwd\artifacts\win-x64" `
-            "/DOutputDir=$pwd\artifacts"
+          $tag = $env:TAG
+          $pf86 = [Environment]::GetFolderPath("ProgramFilesX86")
+          $iscc = Join-Path $pf86 "Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+            $iscc = Join-Path $env:ProgramFiles "Inno Setup 6\ISCC.exe"
+          }
+          $src = Join-Path $pwd "artifacts\win-x64"
+          $out = Join-Path $pwd "artifacts"
+          & $iscc "installer\sdm.iss" "/DMyAppVersion=$tag" "/DSourceDir=$src" "/DOutputDir=$out"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        env:
+          TAG: ${{ steps.meta.outputs.tag }}
 
       - name: Create dated GitHub release
+        shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: pwsh
+          TAG: ${{ steps.meta.outputs.tag }}
+          TITLE: ${{ steps.meta.outputs.title }}
         run: |
-          $tag = "${{ steps.meta.outputs.tag }}"
-          $title = "${{ steps.meta.outputs.title }}"
+          $tag = $env:TAG
+          $title = $env:TITLE
           $setup = Get-ChildItem artifacts -Filter "SDM-Setup-*.exe" | Select-Object -First 1
           $zip = Get-ChildItem artifacts -Filter "SDM-portable-*.zip" | Select-Object -First 1
           if (-not $setup -or -not $zip) { throw "Release files missing" }
@@ -79,22 +89,16 @@ jobs:
 
           gh release delete $tag --yes --cleanup-tag 2>$null
           git tag -f $tag
-          git push origin "refs/tags/${tag}" --force
+          git push origin "refs/tags/$tag" --force
 
-          $notes = @"
-## SDM $tag
+          $notesPath = "artifacts/notes.md"
+          @(
+            "## SDM $tag"
+            ""
+            "Windows x64 빌드."
+            ""
+            "- $($setup.Name) : 설치 마법사"
+            "- $($zip.Name) : Portable (압축 해제 후 SDM.exe)"
+          ) | Set-Content -Path $notesPath -Encoding utf8
 
-Windows x64 빌드.
-
-| 파일 | 설명 |
-|---|---|
-| ``$($setup.Name)`` | 설치 마법사 |
-| ``$($zip.Name)`` | Portable (압축 해제 후 SDM.exe) |
-"@
-
-          gh release create $tag `
-            $setup.FullName `
-            $zip.FullName `
-            --title $title `
-            --notes $notes `
-            --latest
+          gh release create $tag $setup.FullName $zip.FullName --title $title --notes-file $notesPath --latest
