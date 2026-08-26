@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <div class="mark"></div>
+    <div>
+      <strong>SDM</strong>
+      <div class="sub" id="status">연결 확인 중…</div>
+    </div>
+  </header>
+  <label class="row">
+    <span>다운로드 가로채기</span>
+    <input type="checkbox" id="intercept" checked>
+  </label>
+  <label class="row">
+    <span>확장 사용</span>
+    <input type="checkbox" id="enabled" checked>
+  </label>
+  <div class="actions">
+    <button id="open">앱 열기</button>
+    <button id="refresh" class="ghost">상태 새로고침</button>
+  </div>
+  <h2>이 탭의 미디어</h2>
+  <ul id="media"></ul>
+  <script src="popup.js"></script>
+</body>
+</html>

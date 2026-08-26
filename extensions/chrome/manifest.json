@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "SDM",
+  "version": "1.0.0",
+  "description": "SDM 브라우저 연결 — 다운로드 가로채기, 우클릭 전송, 미디어 스니퍼",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiy9BdnrUC1yGHpjb4trL025GQCr+H8KCIbHxCXwhDHUBmxwddoGGZl60EzGUA/mBaat4YURTBdvj/EhlL1RxwSGp52PANdaaTVkRSx2I8sRf53nILL9jjADOcDMrak9igqjOuNaL4JuYzLtesP1SJqupkFNEc6myIW8oBLGX2JazuyQAc/+86iiIv85aydJQ+pOvqQ2mPDEozr4Bno5RJjwHN/8LSj8QhnVMEaj0Y03+3v6wln+uw7zHb2zyOYn44NcUsHShIeYpMudde5OClNSsOjqMSwkbNCXfDdy/FUGVcFyX7sTNYvu/Q+vud0KVxp5lxe4IZyqJcdRmduszOwIDAQAB",
+  "action": {
+    "default_title": "SDM",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/16.png",
+      "32": "icons/32.png",
+      "48": "icons/48.png"
+    }
+  },
+  "icons": {
+    "16": "icons/16.png",
+    "32": "icons/32.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "permissions": [
+    "downloads",
+    "nativeMessaging",
+    "contextMenus",
+    "storage",
+    "cookies",
+    "tabs",
+    "webRequest"
+  ],
+  "host_permissions": ["<all_urls>", "http://127.0.0.1/*"],
+  "web_accessible_resources": [
+    {
+      "resources": ["config.json"],
+      "matches": ["http://*/*", "https://*/*"]
+    }
+  ]
+}

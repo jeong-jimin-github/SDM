@@ -1,0 +1,204 @@
+<Window x:Class="SDM.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:SDM.App.ViewModels"
+        xmlns:conv="clr-namespace:SDM.App.Converters"
+        mc:Ignorable="d"
+        Title="SDM"
+        Height="720" Width="1180"
+        MinHeight="560" MinWidth="920"
+        Background="{StaticResource BgBrush}"
+        Foreground="{StaticResource TextBrush}"
+        FontFamily="Segoe UI Variable, Segoe UI"
+        WindowStartupLocation="CenterScreen"
+        Icon="Assets/sdm.ico">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="48" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0"/>
+    </WindowChrome.WindowChrome>
+    <Window.Resources>
+        <conv:StatusBrushConverter x:Key="StatusBrush"/>
+        <conv:BoolToVis x:Key="BoolToVis"/>
+        <conv:NullToVis x:Key="NullToVis"/>
+    </Window.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="232"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+
+        <!-- Sidebar -->
+        <Border Grid.RowSpan="2" Background="{StaticResource SidebarBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Margin="18,16,18,8">
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="28" Height="28" CornerRadius="8" Background="{StaticResource AccentBrush}" Margin="0,0,10,0">
+                            <Viewbox Margin="6">
+                                <Path Fill="White" Data="M10 4v8.17l-2.59-2.58L6 11l6 6 6-6-1.41-1.41L14 12.17V4h-4zm-6 14v2h16v-2H4z"/>
+                            </Viewbox>
+                        </Border>
+                        <StackPanel>
+                            <TextBlock Text="SDM" FontSize="16" FontWeight="SemiBold"/>
+                            <TextBlock Text="멀티커넥션 매니저" Foreground="{StaticResource MutedBrush}" FontSize="11"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+                <Border DockPanel.Dock="Bottom" Padding="16,12" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0">
+                    <StackPanel>
+                        <TextBlock Text="{Binding BrowserLine}" FontSize="11" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap"/>
+                        <Button Content="브라우저 연결" Style="{StaticResource GhostButton}" Margin="0,8,0,0"
+                                Command="{Binding BrowserCommand}"/>
+                    </StackPanel>
+                </Border>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding Categories}" Margin="4,12,4,8">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <RadioButton GroupName="cat" Style="{StaticResource SidebarButton}"
+                                             Command="{Binding DataContext.FilterCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                             CommandParameter="{Binding Id}"
+                                             IsChecked="{Binding IsSelected, Mode=OneWay}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Title}" FontWeight="Medium"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Count}" Foreground="{StaticResource MutedBrush}" FontSize="11"/>
+                                    </Grid>
+                                </RadioButton>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- Main -->
+        <DockPanel Grid.Column="1">
+            <Border DockPanel.Dock="Top" Height="48" Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1"
+                    WindowChrome.IsHitTestVisibleInChrome="True">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0">
+                        <Button Content="추가" Style="{StaticResource AccentButton}" Command="{Binding AddCommand}" Padding="16,7" Margin="0,0,6,0"/>
+                        <Button Content="재개" Style="{StaticResource GhostButton}" Command="{Binding ResumeCommand}" Margin="0,0,6,0"/>
+                        <Button Content="일시정지" Style="{StaticResource GhostButton}" Command="{Binding PauseCommand}" Margin="0,0,6,0"/>
+                        <Button Content="정지" Style="{StaticResource GhostButton}" Command="{Binding CancelCommand}" Margin="0,0,6,0"/>
+                        <Button Content="삭제" Style="{StaticResource GhostButton}" Command="{Binding RemoveCommand}" Margin="0,0,6,0"/>
+                        <Button Content="폴더" Style="{StaticResource GhostButton}" Command="{Binding OpenFolderCommand}" Margin="0,0,6,0"/>
+                        <Button Content="스니퍼" Style="{StaticResource GhostButton}" Command="{Binding SnifferCommand}" Margin="0,0,6,0"/>
+                        <Button Content="설정" Style="{StaticResource GhostButton}" Command="{Binding SettingsCommand}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" WindowChrome.IsHitTestVisibleInChrome="True" Margin="0,0,8,0">
+                        <TextBox Width="220" Height="30" VerticalAlignment="Center" Margin="0,0,12,0"
+                                 Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}"
+                                 Tag="검색"/>
+                        <Button Style="{StaticResource IconButton}" Width="40" Height="32" Click="Minimize_Click" ToolTip="최소화" Content="—"/>
+                        <Button Style="{StaticResource IconButton}" Width="40" Height="32" Click="Maximize_Click" ToolTip="최대화" Content="☐"/>
+                        <Button Style="{StaticResource IconButton}" Width="40" Height="32" Click="Close_Click" ToolTip="닫기" Content="✕"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <ListBox x:Name="JobList"
+                     ItemsSource="{Binding VisibleItems}"
+                     SelectedItem="{Binding Selected}"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     HorizontalContentAlignment="Stretch">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Margin" Value="12,8,12,0"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <Border x:Name="card" Background="{StaticResource SurfaceBrush}"
+                                            BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                            CornerRadius="12" Padding="0">
+                                        <ContentPresenter/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="card" Property="BorderBrush" Value="#059669"/>
+                                            <Setter TargetName="card" Property="Background" Value="#122033"/>
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="card" Property="BorderBrush" Value="#2A3B5C"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:DownloadItemViewModel}">
+                        <Grid Margin="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="4"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border CornerRadius="12,0,0,12" Background="{Binding Status, Converter={StaticResource StatusBrush}}"/>
+                            <Grid Grid.Column="1" Margin="16,14,16,14">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding FileName}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding StatusText}"
+                                               Foreground="{Binding Status, Converter={StaticResource StatusBrush}}"
+                                               FontSize="12" FontWeight="Medium"/>
+                                </Grid>
+                                <TextBlock Grid.Row="1" Text="{Binding Url}" Foreground="{StaticResource MutedBrush}"
+                                           FontSize="11" Margin="0,4,0,8" TextTrimming="CharacterEllipsis"/>
+                                <ProgressBar Grid.Row="2" Value="{Binding Progress}" Maximum="100" Margin="0,0,0,8"/>
+                                <Grid Grid.Row="3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Detail}" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding SizeText}" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DockPanel>
+
+        <Border Grid.Row="1" Grid.Column="1" Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0">
+            <Grid Margin="14,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="160"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center" Text="{Binding StatusLine}" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
+                <Canvas x:Name="SpeedCanvas" Grid.Column="1" Height="22" Margin="8,0"/>
+                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{Binding SpeedLine}"
+                           FontFamily="Cascadia Mono, Consolas" FontSize="12" Foreground="{StaticResource AccentSoftBrush}"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

@@ -1,0 +1,100 @@
+name: Windows Release
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: windows-release
+  cancel-in-progress: true
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Date tag (KST)
+        id: meta
+        shell: pwsh
+        run: |
+          $kst = [TimeZoneInfo]::FindSystemTimeZoneById("Korea Standard Time")
+          $tag = [TimeZoneInfo]::ConvertTime([DateTime]::UtcNow, $kst).ToString("yyyy-MM-dd")
+          "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "title=SDM $tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "Release tag $tag"
+
+      - name: Publish win-x64
+        shell: pwsh
+        run: ./scripts/publish-windows.ps1 -OutDir artifacts/win-x64
+
+      - name: Portable zip
+        shell: pwsh
+        run: |
+          $tag = "${{ steps.meta.outputs.tag }}"
+          $zip = "artifacts/SDM-portable-$tag.zip"
+          if (Test-Path $zip) { Remove-Item $zip -Force }
+          Compress-Archive -Path "artifacts/win-x64/*" -DestinationPath $zip -CompressionLevel Optimal
+          Write-Host "Wrote $zip"
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --no-progress -y
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          $tag = "${{ steps.meta.outputs.tag }}"
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { $iscc = "$env:ProgramFiles\Inno Setup 6\ISCC.exe" }
+          & $iscc "installer\sdm.iss" `
+            "/DMyAppVersion=$tag" `
+            "/DSourceDir=$pwd\artifacts\win-x64" `
+            "/DOutputDir=$pwd\artifacts"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Create dated GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $tag = "${{ steps.meta.outputs.tag }}"
+          $title = "${{ steps.meta.outputs.title }}"
+          $setup = Get-ChildItem artifacts -Filter "SDM-Setup-*.exe" | Select-Object -First 1
+          $zip = Get-ChildItem artifacts -Filter "SDM-portable-*.zip" | Select-Object -First 1
+          if (-not $setup -or -not $zip) { throw "Release files missing" }
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          gh release delete $tag --yes --cleanup-tag 2>$null
+          git tag -f $tag
+          git push origin "refs/tags/${tag}" --force
+
+          $notes = @"
+## SDM $tag
+
+Windows x64 빌드.
+
+| 파일 | 설명 |
+|---|---|
+| ``$($setup.Name)`` | 설치 마법사 |
+| ``$($zip.Name)`` | Portable (압축 해제 후 SDM.exe) |
+"@
+
+          gh release create $tag `
+            $setup.FullName `
+            $zip.FullName `
+            --title $title `
+            --notes $notes `
+            --latest

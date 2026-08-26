@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <Authors>jeong-jimin-github</Authors>
+    <Company>SDM</Company>
+    <Product>SDM</Product>
+    <Copyright>Copyright (c) jeong-jimin-github</Copyright>
+    <NeutralLanguage>ko-KR</NeutralLanguage>
+  </PropertyGroup>
+</Project>

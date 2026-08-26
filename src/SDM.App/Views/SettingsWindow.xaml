@@ -1,0 +1,55 @@
+<Window x:Class="SDM.App.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="설정 — SDM"
+        Height="560" Width="520"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource BgBrush}"
+        Foreground="{StaticResource TextBrush}"
+        FontFamily="Segoe UI Variable, Segoe UI"
+        ResizeMode="NoResize"
+        Icon="/Assets/sdm.ico">
+    <DockPanel Margin="22">
+        <TextBlock DockPanel.Dock="Top" Text="설정" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16"/>
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="취소" Style="{StaticResource GhostButton}" Width="88" IsCancel="True" Margin="0,0,8,0" Click="Cancel_Click"/>
+            <Button Content="저장" Style="{StaticResource AccentButton}" Width="88" IsDefault="True" Click="Save_Click"/>
+        </StackPanel>
+        <ScrollViewer>
+            <StackPanel>
+                <TextBlock Text="기본 저장 폴더" Style="{StaticResource FieldLabel}"/>
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" Content="찾기" Style="{StaticResource GhostButton}" Width="72" Margin="8,0,0,0" Click="Browse_Click"/>
+                    <TextBox x:Name="FolderBox" Height="34"/>
+                </DockPanel>
+                <CheckBox x:Name="CategoryFoldersBox" Content="분류별 하위 폴더 사용" Margin="0,10,0,0"/>
+
+                <Grid Margin="0,16,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="기본 연결 수" Style="{StaticResource FieldLabel}"/>
+                        <TextBox x:Name="ConnBox" Height="34"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="동시 다운로드" Style="{StaticResource FieldLabel}"/>
+                        <TextBox x:Name="ConcurrentBox" Height="34"/>
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock Text="속도 제한 (KB/s, 0 = 무제한)" Style="{StaticResource FieldLabel}" Margin="0,14,0,0"/>
+                <TextBox x:Name="LimitBox" Height="34"/>
+
+                <CheckBox x:Name="ClipboardBox" Content="클립보드에서 주소 감지" Margin="0,16,0,0"/>
+                <CheckBox x:Name="ConfirmBox" Content="브라우저에서 받을 때 확인 창 표시"/>
+                <CheckBox x:Name="ResumeBox" Content="시작 시 미완료 작업 자동 재개"/>
+                <CheckBox x:Name="TrayBox" Content="닫기 버튼을 누르면 트레이로 최소화"/>
+                <CheckBox x:Name="StartupBox" Content="Windows 시작 시 실행"/>
+                <CheckBox x:Name="NotifyBox" Content="완료/실패 알림"/>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</Window>
