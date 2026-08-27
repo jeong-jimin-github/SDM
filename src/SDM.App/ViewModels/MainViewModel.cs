@@ -51,6 +51,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         SettingsCommand = new RelayCommand(() => RequestSettings?.Invoke());
         BrowserCommand = new RelayCommand(() => RequestBrowser?.Invoke());
         SnifferCommand = new RelayCommand(() => RequestSniffer?.Invoke());
+        ClearSearchCommand = new RelayCommand(() => Search = "", () => !string.IsNullOrEmpty(Search));
         FilterCommand = new RelayCommand(p =>
         {
             if (p is string id) Filter = id;
@@ -78,6 +79,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             else vm.Apply(job, progress);
             RefreshCounts();
             RefreshTotals();
+            ApplyFilter();
             RelayCommand.RaiseCanExecuteChanged();
         });
         _manager.JobRemoved += id => Dispatch(() =>
@@ -129,7 +131,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         get => _search;
         set
         {
-            if (SetProperty(ref _search, value)) ApplyFilter();
+            if (SetProperty(ref _search, value ?? ""))
+            {
+                RelayCommand.RaiseCanExecuteChanged();
+                ApplyFilter();
+            }
         }
     }
 
@@ -159,6 +165,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public RelayCommand SettingsCommand { get; }
     public RelayCommand BrowserCommand { get; }
     public RelayCommand SnifferCommand { get; }
+    public RelayCommand ClearSearchCommand { get; }
     public RelayCommand FilterCommand { get; }
 
     public event Action? RequestAdd;
@@ -238,7 +245,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         VisibleItems.Clear();
         foreach (var item in q) VisibleItems.Add(item);
         OnPropertyChanged(nameof(VisibleItems));
+        OnPropertyChanged(nameof(HasVisibleItems));
+        OnPropertyChanged(nameof(ResultLine));
     }
+
+    public bool HasVisibleItems => VisibleItems.Count > 0;
+    public string ResultLine => string.IsNullOrWhiteSpace(Search)
+        ? $"{VisibleItems.Count}개 항목"
+        : $"“{Search.Trim()}” 검색 결과 {VisibleItems.Count}개";
 
     private void RefreshCounts()
     {

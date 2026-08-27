@@ -36,6 +36,12 @@ public partial class VideoSnifferWindow : Window
     private void List_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
         if (List.SelectedItem is not Row row) return;
+        if (row.Hit.Url.StartsWith("file:", StringComparison.OrdinalIgnoreCase))
+        {
+            MessageBox.Show(this, "로컬 미디어가 감지되었습니다. 브라우저 확장의 파일 URL 액세스 허용이 켜져 있으면 이 목록에 표시됩니다. 로컬 파일은 이미 디스크에 있으므로 SDM 다운로드 대기열에는 추가되지 않습니다.",
+                "SDM 미디어 스니퍼", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
         var dlg = new AddUrlWindow(_manager, _settings, new IpcMessage
         {
             Type = "add",

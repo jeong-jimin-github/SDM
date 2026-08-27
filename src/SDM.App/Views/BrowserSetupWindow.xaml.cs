@@ -22,7 +22,11 @@ public partial class BrowserSetupWindow : Window
         {
             BrowserIntegration.Install(_settings);
             Refresh();
-            MessageBox.Show(this, "Native Messaging 호스트와 프로토콜이 등록되었습니다.\n이어서 브라우저에 확장을 로드하세요.",
+            var path = BrowserIntegration.Query().ChromePath;
+            Clipboard.SetText(path);
+            BrowserIntegration.OpenFolder(path);
+            try { BrowserIntegration.OpenChromeExtensionsPage(); } catch { }
+            MessageBox.Show(this, "연결 구성과 확장 파일 준비가 끝났습니다.\n\n확장 페이지에서 개발자 모드를 켠 뒤 ‘압축해제된 확장 프로그램을 로드합니다’를 누르세요. 선택할 폴더 경로는 클립보드에 복사했고 탐색기에도 열었습니다.",
                 "SDM", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
@@ -41,7 +45,7 @@ public partial class BrowserSetupWindow : Window
     {
         try
         {
-            Process.Start(new ProcessStartInfo("http://chrome://extensions") { UseShellExecute = true });
+            BrowserIntegration.OpenChromeExtensionsPage();
         }
         catch
         {

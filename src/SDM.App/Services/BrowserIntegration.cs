@@ -99,7 +99,22 @@ public static class BrowserIntegration
 
     public static void OpenChromeExtensionsPage()
     {
-        Process.Start(new ProcessStartInfo("chrome://extensions") { UseShellExecute = true });
+        var candidates = new[]
+        {
+            ("chrome.exe", "chrome://extensions"),
+            ("msedge.exe", "edge://extensions"),
+            ("brave.exe", "brave://extensions")
+        };
+        foreach (var (exe, url) in candidates)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(exe, url) { UseShellExecute = true });
+                return;
+            }
+            catch { /* try the next installed Chromium browser */ }
+        }
+        throw new InvalidOperationException("Chrome, Edge 또는 Brave를 찾지 못했습니다.");
     }
 
     public static void OpenFolder(string path)

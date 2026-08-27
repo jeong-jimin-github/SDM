@@ -53,5 +53,24 @@ Name: "{autodesktop}\SDM"; Filename: "{app}\SDM.exe"; Tasks: desktopicon
 Filename: "{app}\SDM.exe"; Description: "SDM 실행"; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
-Type: filesandordirs; Name: "{localappdata}\SDM\native-messaging"
-Type: filesandordirs; Name: "{localappdata}\SDM\extensions"
+Type: filesandordirs; Name: "{localappdata}\SDM"
+
+[Registry]
+Root: HKCU; Subkey: "Software\Google\Chrome\NativeMessagingHosts\com.sdm.host"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Chromium\NativeMessagingHosts\com.sdm.host"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Microsoft\Edge\NativeMessagingHosts\com.sdm.host"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\BraveSoftware\Brave-Browser\NativeMessagingHosts\com.sdm.host"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Mozilla\NativeMessagingHosts\com.sdm.host"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\sdm"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: none; ValueName: "SDM"; Flags: uninsdeletevalue
+
+[Code]
+function InitializeUninstall(): Boolean;
+var
+  ResultCode: Integer;
+begin
+  { Stop both executables before [UninstallDelete] removes their files. }
+  Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /T /IM SDM.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /T /IM SDM.NativeHost.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Result := True;
+end;

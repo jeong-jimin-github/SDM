@@ -141,12 +141,17 @@ api.webRequest.onHeadersReceived.addListener(
       mime,
       size: sizeRaw ? Number(sizeRaw) : undefined,
       pageUrl: details.initiator || details.originUrl,
-      tabTitle: ""
+      pageTitle: ""
     };
     const list = tabMedia.get(details.tabId) || [];
     if (!list.some((x) => x.url === hit.url)) {
       list.unshift(hit);
       tabMedia.set(details.tabId, list.slice(0, 80));
+      api.tabs.get(details.tabId).then((tab) => sendToHost({
+        type: "media",
+        media: [{ ...hit, pageUrl: tab?.url || hit.pageUrl, pageTitle: tab?.title || "" }],
+        browser: browserName()
+      })).catch(() => { /* SDM may not be running */ });
     }
   },
   { urls: ["<all_urls>"] },
@@ -166,17 +171,23 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       const tabId = sender.tab?.id;
       if (tabId == null) return;
       const list = tabMedia.get(tabId) || [];
+      const added = [];
       for (const url of msg.urls || []) {
         if (!list.some((x) => x.url === url)) {
-          list.unshift({
+          const hit = {
             url,
             mime: msg.mime,
             pageUrl: msg.pageUrl,
             pageTitle: msg.title
-          });
+          };
+          list.unshift(hit);
+          added.push(hit);
         }
       }
       tabMedia.set(tabId, list.slice(0, 80));
+      if (added.length > 0) {
+        await sendToHost({ type: "media", media: added, pageUrl: msg.pageUrl, pageTitle: msg.title });
+      }
       sendResponse({ ok: true, count: list.length });
       return;
     }

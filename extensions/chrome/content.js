@@ -6,7 +6,7 @@
     document.querySelectorAll("video, audio, source").forEach((el) => {
       ["src", "currentSrc"].forEach((k) => {
         const v = el[k];
-        if (v && /^https?:/i.test(v)) urls.add(v);
+        if (v && /^(https?:|file:)/i.test(v)) urls.add(v);
       });
     });
     document.querySelectorAll("a[href]").forEach((a) => {

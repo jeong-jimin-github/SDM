@@ -66,6 +66,18 @@ public partial class MainWindow : Window
     {
         if (e.Key == Key.N && Keyboard.Modifiers == ModifierKeys.Control) _host.Main.AddCommand.Execute(null);
         else if (e.Key == Key.S && Keyboard.Modifiers == ModifierKeys.Control) _host.Main.SettingsCommand.Execute(null);
+        else if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control)
+        {
+            SearchBox.Focus();
+            SearchBox.SelectAll();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Escape && SearchBox.IsKeyboardFocusWithin)
+        {
+            _host.Main.Search = "";
+            Keyboard.ClearFocus();
+            e.Handled = true;
+        }
         else if (e.Key == Key.Delete) _host.Main.RemoveCommand.Execute(null);
         else if (e.Key == Key.Space)
         {

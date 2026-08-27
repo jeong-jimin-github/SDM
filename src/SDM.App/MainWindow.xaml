@@ -21,6 +21,7 @@
         <conv:StatusBrushConverter x:Key="StatusBrush"/>
         <conv:BoolToVis x:Key="BoolToVis"/>
         <conv:NullToVis x:Key="NullToVis"/>
+        <conv:InverseBoolToVis x:Key="InverseBoolToVis"/>
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -83,11 +84,19 @@
 
         <!-- Main -->
         <DockPanel Grid.Column="1">
-            <Border DockPanel.Dock="Top" Height="48" Background="{StaticResource SurfaceBrush}"
+            <Border DockPanel.Dock="Top" Height="104" Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1"
                     WindowChrome.IsHitTestVisibleInChrome="True">
                 <Grid>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="48"/>
+                        <RowDefinition Height="56"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0">
+                        <TextBlock Text="다운로드" FontSize="17" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding ResultLine}" Margin="10,2,0,0" Foreground="{StaticResource MutedBrush}" FontSize="12" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0">
                         <Button Content="추가" Style="{StaticResource AccentButton}" Command="{Binding AddCommand}" Padding="16,7" Margin="0,0,6,0"/>
                         <Button Content="재개" Style="{StaticResource GhostButton}" Command="{Binding ResumeCommand}" Margin="0,0,6,0"/>
                         <Button Content="일시정지" Style="{StaticResource GhostButton}" Command="{Binding PauseCommand}" Margin="0,0,6,0"/>
@@ -98,9 +107,15 @@
                         <Button Content="설정" Style="{StaticResource GhostButton}" Command="{Binding SettingsCommand}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" WindowChrome.IsHitTestVisibleInChrome="True" Margin="0,0,8,0">
-                        <TextBox Width="220" Height="30" VerticalAlignment="Center" Margin="0,0,12,0"
-                                 Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}"
-                                 Tag="검색"/>
+                        <Border Width="260" Height="34" Margin="0,0,12,0" CornerRadius="8" Background="#0B1224" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                            <Grid>
+                                <TextBox x:Name="SearchBox" BorderThickness="0" Padding="34,7,32,7" Background="Transparent"
+                                         Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" ToolTip="파일명 또는 URL 검색 (Ctrl+F)"/>
+                                <TextBlock Text="⌕" FontSize="18" Margin="10,0,0,2" Foreground="{StaticResource MutedBrush}" IsHitTestVisible="False" VerticalAlignment="Center"/>
+                                <Button Content="×" Style="{StaticResource IconButton}" Width="28" Height="28" Padding="0"
+                                        HorizontalAlignment="Right" Command="{Binding ClearSearchCommand}" ToolTip="검색 지우기"/>
+                            </Grid>
+                        </Border>
                         <Button Style="{StaticResource IconButton}" Width="40" Height="32" Click="Minimize_Click" ToolTip="최소화" Content="—"/>
                         <Button Style="{StaticResource IconButton}" Width="40" Height="32" Click="Maximize_Click" ToolTip="최대화" Content="☐"/>
                         <Button Style="{StaticResource IconButton}" Width="40" Height="32" Click="Close_Click" ToolTip="닫기" Content="✕"/>
@@ -108,6 +123,7 @@
                 </Grid>
             </Border>
 
+            <Grid>
             <ListBox x:Name="JobList"
                      ItemsSource="{Binding VisibleItems}"
                      SelectedItem="{Binding Selected}"
@@ -184,6 +200,13 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Visibility="{Binding HasVisibleItems, Converter={StaticResource InverseBoolToVis}}" IsHitTestVisible="False">
+                    <TextBlock Text="⌕" FontSize="38" HorizontalAlignment="Center" Foreground="{StaticResource MutedBrush}"/>
+                    <TextBlock Text="표시할 다운로드가 없습니다" FontSize="16" FontWeight="SemiBold" Margin="0,10,0,4"/>
+                    <TextBlock Text="검색어를 지우거나 다른 분류를 선택하세요." Foreground="{StaticResource MutedBrush}"/>
+                </StackPanel>
+            </Grid>
         </DockPanel>
 
         <Border Grid.Row="1" Grid.Column="1" Background="{StaticResource SurfaceBrush}"
