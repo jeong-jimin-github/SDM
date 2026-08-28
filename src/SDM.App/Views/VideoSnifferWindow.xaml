@@ -20,7 +20,8 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel>
-                <TextBlock Text="미디어 스니퍼" FontSize="24" FontWeight="Bold"/>
+                <TextBlock Text="미디어 스니퍼" FontSize="24" FontWeight="Bold"
+                           Foreground="{StaticResource TextBrush}"/>
                 <TextBlock Text="브라우저에서 감지한 오디오와 비디오 요청"
                            Foreground="{StaticResource MutedBrush}" Margin="0,5,0,0"/>
             </StackPanel>

@@ -38,7 +38,8 @@
                             </Viewbox>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="SDM" FontSize="18" FontWeight="Bold"/>
+                            <TextBlock Text="SDM" FontSize="18" FontWeight="Bold"
+                                       Foreground="{StaticResource TextBrush}"/>
                             <TextBlock Text="DOWNLOAD DESK" Foreground="{StaticResource SubtleBrush}" FontSize="10" FontWeight="SemiBold"/>
                         </StackPanel>
                     </StackPanel>
@@ -48,7 +49,8 @@
                         Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
                     <StackPanel>
                         <TextBlock Text="브라우저 상태" Foreground="{StaticResource SubtleBrush}" FontSize="10" FontWeight="Bold"/>
-                        <TextBlock Text="{Binding BrowserLine}" FontSize="12" Margin="0,5,0,10" TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding BrowserLine}" FontSize="12" Margin="0,5,0,10" TextWrapping="Wrap"
+                                   Foreground="{StaticResource TextBrush}"/>
                         <Button Content="브라우저 연결 설정" Style="{StaticResource GhostButton}" Command="{Binding BrowserCommand}"/>
                     </StackPanel>
                 </Border>
@@ -66,9 +68,11 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold"
+                                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/>
                                         <Border Grid.Column="1" MinWidth="26" Padding="7,2" CornerRadius="9" Background="#20324A">
-                                            <TextBlock Text="{Binding Count}" HorizontalAlignment="Center" FontSize="11"/>
+                                            <TextBlock Text="{Binding Count}" HorizontalAlignment="Center" FontSize="11"
+                                                       Foreground="{StaticResource TextBrush}"/>
                                         </Border>
                                     </Grid>
                                 </RadioButton>
@@ -94,7 +98,8 @@
                         <ColumnDefinition Width="330"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel>
-                        <TextBlock Text="다운로드" FontSize="23" FontWeight="Bold"/>
+                        <TextBlock Text="다운로드" FontSize="23" FontWeight="Bold"
+                                   Foreground="{StaticResource TextBrush}"/>
                         <TextBlock Text="{Binding ResultLine}" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,4,0,0"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1">
@@ -130,6 +135,7 @@
                          ItemsSource="{Binding VisibleItems}"
                          SelectedItem="{Binding Selected}"
                          Background="Transparent"
+                         Foreground="{StaticResource TextBrush}"
                          BorderThickness="0"
                          Padding="8"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -141,6 +147,7 @@
                             <Setter Property="Margin" Value="8,6"/>
                             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                             <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="ListBoxItem">
@@ -185,6 +192,7 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="{Binding FileName}" FontSize="15" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource TextBrush}"
                                                    TextTrimming="CharacterEllipsis"/>
                                         <Border Grid.Column="1" Padding="9,3" CornerRadius="9" Background="#203149">
                                             <TextBlock Text="{Binding StatusText}"
@@ -216,7 +224,8 @@
                         <TextBlock Text="↓" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center"
                                    Foreground="{StaticResource AccentSoftBrush}"/>
                     </Border>
-                    <TextBlock Text="다운로드가 없습니다" FontSize="17" FontWeight="SemiBold" Margin="0,14,0,5"/>
+                    <TextBlock Text="다운로드가 없습니다" FontSize="17" FontWeight="SemiBold" Margin="0,14,0,5"
+                               Foreground="{StaticResource TextBrush}"/>
                     <TextBlock Text="새 주소를 추가하거나 검색 조건을 변경하세요." Foreground="{StaticResource MutedBrush}"/>
                 </StackPanel>
             </Grid>

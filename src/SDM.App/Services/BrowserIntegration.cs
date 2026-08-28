@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using SDM.Core.Models;
 using SDM.Core.Persistence;
@@ -105,44 +106,91 @@ public static class BrowserIntegration
             ("msedge.exe", "edge://extensions/"),
             ("brave.exe", "brave://extensions/")
         };
+
         foreach (var (exe, url) in candidates)
         {
             foreach (var executable in FindBrowserExecutables(exe))
             {
-                try
-                {
-                    var process = Process.Start(new ProcessStartInfo
-                    {
-                        FileName = executable,
-                        Arguments = $"--new-window {url}",
-                        UseShellExecute = true
-                    });
-                    if (process is not null) return;
-                }
-                catch { /* try the next registered path/browser */ }
+                if (TryStartBrowser(executable, ["--new-window", url])) return;
+                if (TryStartBrowser(executable, [url])) return;
             }
         }
+
+        if (TryStartProtocol("microsoft-edge:edge://extensions")) return;
+
         throw new InvalidOperationException("Chrome, Edge 또는 Brave를 찾지 못했습니다.");
     }
 
     public static void OpenFirefoxDebugPage()
     {
+        const string url = "about:debugging#/runtime/this-firefox";
         foreach (var executable in FindBrowserExecutables("firefox.exe"))
         {
-            try
-            {
-                var process = Process.Start(new ProcessStartInfo
-                {
-                    FileName = executable,
-                    Arguments = "-new-window about:debugging#/runtime/this-firefox",
-                    UseShellExecute = true
-                });
-                if (process is not null) return;
-            }
-            catch { /* try the next registered path */ }
+            if (TryStartBrowser(executable, ["-new-window", url])) return;
+            if (TryStartBrowser(executable, [url])) return;
         }
         throw new InvalidOperationException("Firefox를 찾지 못했습니다.");
     }
+
+    private static bool TryStartBrowser(string executable, IReadOnlyList<string> arguments)
+    {
+        try
+        {
+            AllowSetForegroundWindow(-1);
+            var psi = new ProcessStartInfo
+            {
+                FileName = executable,
+                UseShellExecute = false
+            };
+            foreach (var argument in arguments)
+                psi.ArgumentList.Add(argument);
+            Process.Start(psi);
+            return true;
+        }
+        catch
+        {
+            try
+            {
+                AllowSetForegroundWindow(-1);
+                var quoted = string.Join(" ", arguments.Select(QuoteArg));
+                var process = Process.Start(new ProcessStartInfo
+                {
+                    FileName = executable,
+                    Arguments = quoted,
+                    UseShellExecute = true
+                });
+                return process is not null;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+    }
+
+    private static bool TryStartProtocol(string url)
+    {
+        try
+        {
+            AllowSetForegroundWindow(-1);
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static string QuoteArg(string value) =>
+        value.Contains(' ') || value.Contains('#') ? $"\"{value}\"" : value;
+
+    [DllImport("user32.dll")]
+    private static extern bool AllowSetForegroundWindow(int dwProcessId);
 
     private static IEnumerable<string> FindBrowserExecutables(string executableName)
     {
@@ -156,7 +204,7 @@ public static class BrowserIntegration
 
         foreach (var key in registryKeys)
         {
-            if (Registry.GetValue(key, "", null) is string path && File.Exists(path) && seen.Add(path))
+            if (Registry.GetValue(key, "", null) is string path && IsUsableBrowserPath(path) && seen.Add(path))
                 yield return path;
         }
 
@@ -191,10 +239,21 @@ public static class BrowserIntegration
         };
 
         foreach (var path in knownPaths)
-            if (File.Exists(path) && seen.Add(path)) yield return path;
+            if (IsUsableBrowserPath(path) && seen.Add(path)) yield return path;
+    }
 
-        // Let ShellExecute resolve PATH/app aliases last.
-        if (seen.Add(executableName)) yield return executableName;
+    private static bool IsUsableBrowserPath(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path)) return false;
+        if (path.Contains(@"\WindowsApps\", StringComparison.OrdinalIgnoreCase)) return false;
+        try
+        {
+            return new FileInfo(path).Length > 0;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     public static void OpenFolder(string path)

@@ -7,6 +7,8 @@ publish/
 *.suo
 *.log
 *.sdmpart
+.codex-artifacts/
+TODO.txt
 keys/*.pem
 keys/*.der
 helix-icon-src.jpg

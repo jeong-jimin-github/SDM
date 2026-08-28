@@ -3,104 +3,112 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="다운로드 추가 — SDM"
         Height="650" Width="680"
-        MinHeight="620" MinWidth="640"
+        MinHeight="480" MinWidth="640"
         WindowStartupLocation="CenterOwner"
         ResizeMode="CanResizeWithGrip"
         Icon="/Assets/sdm.ico">
     <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <StackPanel Margin="0,0,0,16">
-            <TextBlock Text="새 다운로드" FontSize="24" FontWeight="Bold"/>
+            <TextBlock Text="새 다운로드" FontSize="24" FontWeight="Bold"
+                       Foreground="{StaticResource TextBrush}"/>
             <TextBlock Text="주소와 저장 위치를 확인한 뒤 바로 시작하거나 대기열에 추가하세요."
                        Foreground="{StaticResource MutedBrush}" Margin="0,5,0,0"/>
         </StackPanel>
 
-        <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,0,0,14" Background="#12263A">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="6"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Border Background="{StaticResource AccentBrush}" CornerRadius="3"/>
-                <StackPanel Grid.Column="1" Margin="14,0,0,0">
-                    <TextBlock x:Name="SummaryName" FontSize="15" FontWeight="SemiBold"
-                               TextWrapping="Wrap" Text="파일 정보를 읽는 중…"/>
-                    <TextBlock x:Name="SummaryMeta" Margin="0,7,0,0" FontSize="12"
-                               Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap"/>
-                </StackPanel>
-            </Grid>
-        </Border>
-
-        <Border Grid.Row="2" Style="{StaticResource Card}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-
-                <StackPanel>
-                    <TextBlock Text="다운로드 주소" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="UrlBox"/>
-                </StackPanel>
-
-                <Grid Grid.Row="1" Margin="0,16,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="18"/>
-                        <ColumnDefinition Width="190"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel>
-                        <TextBlock Text="파일 이름" Style="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="NameBox"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="2">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="연결 수" Style="{StaticResource FieldLabel}"/>
-                            <Border Grid.Column="1" Background="#203149" CornerRadius="9" Padding="8,2" Margin="0,0,0,6">
-                                <TextBlock x:Name="ConnLabel" Text="8" FontSize="11" FontWeight="Bold"
-                                           Foreground="{StaticResource AccentSoftBrush}"/>
-                            </Border>
-                        </Grid>
-                        <Slider x:Name="ConnSlider" Minimum="1" Maximum="32" Value="8"
-                                TickFrequency="1" IsSnapToTickEnabled="True"
-                                VerticalAlignment="Center" Margin="0,8,0,0"
-                                ValueChanged="ConnSlider_OnValueChanged"/>
-                    </StackPanel>
-                </Grid>
-
-                <StackPanel Grid.Row="2" Margin="0,16,0,0">
-                    <TextBlock Text="저장 폴더" Style="{StaticResource FieldLabel}"/>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      CanContentScroll="False"
+                      PanningMode="VerticalOnly">
+            <StackPanel>
+                <Border Style="{StaticResource Card}" Margin="0,0,0,14" Background="#12263A">
                     <Grid>
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="6"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition Width="82"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox x:Name="FolderBox"/>
-                        <Button Grid.Column="2" Content="찾아보기" Style="{StaticResource GhostButton}" Click="Browse_Click"/>
+                        <Border Background="{StaticResource AccentBrush}" CornerRadius="3"/>
+                        <StackPanel Grid.Column="1" Margin="14,0,0,0">
+                            <TextBlock x:Name="SummaryName" FontSize="15" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextBrush}"
+                                       TextWrapping="Wrap" Text="파일 정보를 읽는 중…"/>
+                            <TextBlock x:Name="SummaryMeta" Margin="0,7,0,0" FontSize="12"
+                                       Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap"/>
+                        </StackPanel>
                     </Grid>
-                </StackPanel>
-
-                <Border Grid.Row="3" Margin="0,15,0,0" Padding="12,9" CornerRadius="8" Background="#0C1728">
-                    <TextBlock x:Name="CategoryHint" Foreground="{StaticResource MutedBrush}"
-                               FontSize="12" TextWrapping="Wrap"/>
                 </Border>
-            </Grid>
-        </Border>
 
-        <Grid Grid.Row="3" Margin="0,18,0,0">
+                <Border Style="{StaticResource Card}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="다운로드 주소" Style="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="UrlBox"/>
+                        </StackPanel>
+
+                        <Grid Grid.Row="1" Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="18"/>
+                                <ColumnDefinition Width="190"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="파일 이름" Style="{StaticResource FieldLabel}"/>
+                                <TextBox x:Name="NameBox"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="연결 수" Style="{StaticResource FieldLabel}"/>
+                                    <Border Grid.Column="1" Background="#203149" CornerRadius="9" Padding="8,2" Margin="0,0,0,6">
+                                        <TextBlock x:Name="ConnLabel" Text="8" FontSize="11" FontWeight="Bold"
+                                                   Foreground="{StaticResource AccentSoftBrush}"/>
+                                    </Border>
+                                </Grid>
+                                <Slider x:Name="ConnSlider" Minimum="1" Maximum="32" Value="8"
+                                        TickFrequency="1" IsSnapToTickEnabled="True"
+                                        VerticalAlignment="Center" Margin="0,8,0,0"
+                                        ValueChanged="ConnSlider_OnValueChanged"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Grid.Row="2" Margin="0,16,0,0">
+                            <TextBlock Text="저장 폴더" Style="{StaticResource FieldLabel}"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="82"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="FolderBox"/>
+                                <Button Grid.Column="2" Content="찾아보기" Style="{StaticResource GhostButton}" Click="Browse_Click"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <Border Grid.Row="3" Margin="0,15,0,0" Padding="12,9" CornerRadius="8" Background="#0C1728">
+                            <TextBlock x:Name="CategoryHint" Foreground="{StaticResource MutedBrush}"
+                                       FontSize="12" TextWrapping="Wrap"/>
+                        </Border>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid Grid.Row="2" Margin="0,18,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>

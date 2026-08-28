@@ -31,7 +31,7 @@ jobs:
         shell: pwsh
         run: |
           $kst = [TimeZoneInfo]::FindSystemTimeZoneById("Korea Standard Time")
-          $tag = [TimeZoneInfo]::ConvertTime([DateTime]::UtcNow, $kst).ToString("yyyy-MM-dd")
+          $tag = [TimeZoneInfo]::ConvertTime([DateTime]::UtcNow, $kst).ToString("yyyy-MM-dd-HH-mm-ss")
           Add-Content -Path $env:GITHUB_OUTPUT -Value "tag=$tag"
           Add-Content -Path $env:GITHUB_OUTPUT -Value "title=SDM $tag"
           Write-Host "Release tag $tag"
