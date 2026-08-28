@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Windows;
 using SDM.App.Services;
 using SDM.Core.Models;
@@ -59,7 +58,7 @@ public partial class BrowserSetupWindow : Window
     {
         try
         {
-            Process.Start(new ProcessStartInfo("firefox.exe", "about:debugging#/runtime/this-firefox") { UseShellExecute = true });
+            BrowserIntegration.OpenFirefoxDebugPage();
         }
         catch
         {

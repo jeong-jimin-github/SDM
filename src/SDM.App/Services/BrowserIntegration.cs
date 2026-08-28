@@ -101,20 +101,100 @@ public static class BrowserIntegration
     {
         var candidates = new[]
         {
-            ("chrome.exe", "chrome://extensions"),
-            ("msedge.exe", "edge://extensions"),
-            ("brave.exe", "brave://extensions")
+            ("chrome.exe", "chrome://extensions/"),
+            ("msedge.exe", "edge://extensions/"),
+            ("brave.exe", "brave://extensions/")
         };
         foreach (var (exe, url) in candidates)
         {
-            try
+            foreach (var executable in FindBrowserExecutables(exe))
             {
-                Process.Start(new ProcessStartInfo(exe, url) { UseShellExecute = true });
-                return;
+                try
+                {
+                    var process = Process.Start(new ProcessStartInfo
+                    {
+                        FileName = executable,
+                        Arguments = $"--new-window {url}",
+                        UseShellExecute = true
+                    });
+                    if (process is not null) return;
+                }
+                catch { /* try the next registered path/browser */ }
             }
-            catch { /* try the next installed Chromium browser */ }
         }
         throw new InvalidOperationException("Chrome, Edge 또는 Brave를 찾지 못했습니다.");
+    }
+
+    public static void OpenFirefoxDebugPage()
+    {
+        foreach (var executable in FindBrowserExecutables("firefox.exe"))
+        {
+            try
+            {
+                var process = Process.Start(new ProcessStartInfo
+                {
+                    FileName = executable,
+                    Arguments = "-new-window about:debugging#/runtime/this-firefox",
+                    UseShellExecute = true
+                });
+                if (process is not null) return;
+            }
+            catch { /* try the next registered path */ }
+        }
+        throw new InvalidOperationException("Firefox를 찾지 못했습니다.");
+    }
+
+    private static IEnumerable<string> FindBrowserExecutables(string executableName)
+    {
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var registryKeys = new[]
+        {
+            $@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\App Paths\{executableName}",
+            $@"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\App Paths\{executableName}",
+            $@"HKEY_LOCAL_MACHINE\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\App Paths\{executableName}"
+        };
+
+        foreach (var key in registryKeys)
+        {
+            if (Registry.GetValue(key, "", null) is string path && File.Exists(path) && seen.Add(path))
+                yield return path;
+        }
+
+        var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+        var programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
+        var knownPaths = executableName.ToLowerInvariant() switch
+        {
+            "chrome.exe" => new[]
+            {
+                Path.Combine(local, "Google", "Chrome", "Application", executableName),
+                Path.Combine(programFiles, "Google", "Chrome", "Application", executableName),
+                Path.Combine(programFilesX86, "Google", "Chrome", "Application", executableName)
+            },
+            "msedge.exe" => new[]
+            {
+                Path.Combine(programFilesX86, "Microsoft", "Edge", "Application", executableName),
+                Path.Combine(programFiles, "Microsoft", "Edge", "Application", executableName)
+            },
+            "brave.exe" => new[]
+            {
+                Path.Combine(local, "BraveSoftware", "Brave-Browser", "Application", executableName),
+                Path.Combine(programFiles, "BraveSoftware", "Brave-Browser", "Application", executableName),
+                Path.Combine(programFilesX86, "BraveSoftware", "Brave-Browser", "Application", executableName)
+            },
+            _ => new[]
+            {
+                Path.Combine(programFiles, "Mozilla Firefox", executableName),
+                Path.Combine(programFilesX86, "Mozilla Firefox", executableName),
+                Path.Combine(local, "Mozilla Firefox", executableName)
+            }
+        };
+
+        foreach (var path in knownPaths)
+            if (File.Exists(path) && seen.Add(path)) yield return path;
+
+        // Let ShellExecute resolve PATH/app aliases last.
+        if (seen.Add(executableName)) yield return executableName;
     }
 
     public static void OpenFolder(string path)
